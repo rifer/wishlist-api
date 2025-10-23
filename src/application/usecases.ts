@@ -114,3 +114,17 @@ export class DeleteWishlistUseCase {
     await this.wishlistRepo.delete(id);
   }
 }
+
+export class UpdateWishlistUseCase {
+  constructor(private readonly wishlistRepo: IWishlistRepository) {}
+
+  async execute(id: string, name: string, description: string): Promise<Wishlist> {
+    const wishlist = await this.wishlistRepo.findById(id);
+    if (!wishlist) {
+      throw new WishlistNotFoundException(id);
+    }
+
+    const updatedWishlist = wishlist.update(name, description);
+    return await this.wishlistRepo.save(updatedWishlist);
+  }
+}

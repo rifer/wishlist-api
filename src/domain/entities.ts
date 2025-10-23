@@ -32,6 +32,18 @@ export class Wishlist {
       new Date()
     );
   }
+
+  update(name: string, description: string): Wishlist {
+    return new Wishlist(
+      this.id,
+      this.userId,
+      name,
+      description,
+      this.items,
+      this.createdAt,
+      new Date()
+    );
+  }
 }
 
 export class WishlistItem {

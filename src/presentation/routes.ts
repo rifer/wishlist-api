@@ -7,7 +7,8 @@ import {
   RemoveItemFromWishlistUseCase,
   GetWishlistByIdUseCase,
   GetAllWishlistsUseCase,
-  DeleteWishlistUseCase
+  DeleteWishlistUseCase,
+  UpdateWishlistUseCase
 } from '../application/usecases';
 import { IWishlistRepository, IUserRepository } from '../domain/ports';
 
@@ -24,6 +25,7 @@ export function createRoutes(
   const getWishlistByIdUC = new GetWishlistByIdUseCase(wishlistRepo);
   const getAllWishlistsUC = new GetAllWishlistsUseCase(wishlistRepo);
   const deleteWishlistUC = new DeleteWishlistUseCase(wishlistRepo);
+  const updateWishlistUC = new UpdateWishlistUseCase(wishlistRepo);
 
   router.get('/wishlists', async (req: Request, res: Response) => {
     const wishlists = await getAllWishlistsUC.execute();
@@ -40,6 +42,15 @@ export function createRoutes(
     try {
       const wishlist = await createWishlistUC.execute(req.body.userId, req.body.name, req.body.description);
       res.status(201).json(wishlist);
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  });
+
+  router.put('/wishlists/:id', async (req: Request, res: Response) => {
+    try {
+      const wishlist = await updateWishlistUC.execute(req.params.id, req.body.name, req.body.description);
+      res.json(wishlist);
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
     }
