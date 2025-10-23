@@ -18,6 +18,7 @@ export const swaggerDocument = {
           name: { type: 'string' },
           description: { type: 'string' },
           items: { type: 'array', items: { $ref: '#/components/schemas/WishlistItem' } },
+          isDefault: { type: 'boolean', default: false, description: 'Whether this is the default wishlist for the user (only one per user)' },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' }
         }
@@ -81,7 +82,8 @@ export const swaggerDocument = {
                 properties: {
                   userId: { type: 'string' },
                   name: { type: 'string' },
-                  description: { type: 'string' }
+                  description: { type: 'string' },
+                  isDefault: { type: 'boolean', default: false, description: 'Set as default wishlist (only one per user)' }
                 }
               }
             }
@@ -96,7 +98,7 @@ export const swaggerDocument = {
               }
             }
           },
-          '400': { description: 'Bad request' }
+          '400': { description: 'Bad request - duplicate name or validation error' }
         }
       }
     },
@@ -134,7 +136,8 @@ export const swaggerDocument = {
                 required: ['name', 'description'],
                 properties: {
                   name: { type: 'string' },
-                  description: { type: 'string' }
+                  description: { type: 'string' },
+                  isDefault: { type: 'boolean', description: 'Set as default wishlist (optional, only one per user)' }
                 }
               }
             }
@@ -149,7 +152,7 @@ export const swaggerDocument = {
               }
             }
           },
-          '400': { description: 'Bad request' },
+          '400': { description: 'Bad request - duplicate name or validation error' },
           '404': { description: 'Wishlist not found' }
         }
       },
@@ -161,6 +164,28 @@ export const swaggerDocument = {
         ],
         responses: {
           '204': { description: 'Wishlist deleted' }
+        }
+      }
+    },
+    '/wishlists/{id}/set-default': {
+      post: {
+        summary: 'Set wishlist as default',
+        description: 'Set this wishlist as the default for the user. Automatically unsets any other default wishlist.',
+        tags: ['Wishlists'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Wishlist ID to set as default' }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist set as default',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '400': { description: 'Bad request' },
+          '404': { description: 'Wishlist not found' }
         }
       }
     },

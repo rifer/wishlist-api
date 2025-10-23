@@ -36,6 +36,16 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
     return Array.from(this.wishlists.values());
   }
 
+  async clearDefaultForUser(userId: string): Promise<void> {
+    const userWishlists = await this.findByUserId(userId);
+    for (const wishlist of userWishlists) {
+      if (wishlist.isDefault) {
+        const updated = wishlist.setDefault(false);
+        this.wishlists.set(updated.id, updated);
+      }
+    }
+  }
+
   private seedData(): void {
     const item1 = new WishlistItem(
       'item_1',
@@ -99,6 +109,7 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       'Tech Wishlist',
       'Gadgets and tech items I want',
       [item1, item2],
+      true,
       new Date('2025-01-10'),
       new Date('2025-01-20')
     );
@@ -109,6 +120,7 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       'Fitness Goals',
       'Items for my fitness journey',
       [item3, item4],
+      false,
       new Date('2025-02-01'),
       new Date('2025-02-05')
     );
@@ -119,6 +131,7 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       'Home Improvement',
       'Things for the house',
       [],
+      true,
       new Date('2025-01-25'),
       new Date('2025-01-25')
     );

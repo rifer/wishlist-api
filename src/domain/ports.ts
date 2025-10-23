@@ -7,6 +7,7 @@ export interface IWishlistRepository {
   save(wishlist: Wishlist): Promise<Wishlist>;
   delete(id: string): Promise<void>;
   findAll(): Promise<Wishlist[]>;
+  clearDefaultForUser(userId: string): Promise<void>;
 }
 
 export interface IUserRepository {

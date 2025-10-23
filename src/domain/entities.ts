@@ -5,6 +5,7 @@ export class Wishlist {
     public readonly name: string,
     public readonly description: string,
     public readonly items: WishlistItem[],
+    public readonly isDefault: boolean,
     public readonly createdAt: Date,
     public readonly updatedAt: Date
   ) {}
@@ -16,6 +17,7 @@ export class Wishlist {
       this.name,
       this.description,
       [...this.items, item],
+      this.isDefault,
       this.createdAt,
       new Date()
     );
@@ -28,6 +30,7 @@ export class Wishlist {
       this.name,
       this.description,
       this.items.filter(item => item.id !== itemId),
+      this.isDefault,
       this.createdAt,
       new Date()
     );
@@ -40,6 +43,20 @@ export class Wishlist {
       name,
       description,
       this.items,
+      this.isDefault,
+      this.createdAt,
+      new Date()
+    );
+  }
+
+  setDefault(isDefault: boolean): Wishlist {
+    return new Wishlist(
+      this.id,
+      this.userId,
+      this.name,
+      this.description,
+      this.items,
+      isDefault,
       this.createdAt,
       new Date()
     );

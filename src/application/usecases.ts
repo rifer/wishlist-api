@@ -7,7 +7,7 @@ export class CreateWishlistUseCase {
     private readonly userRepo: IUserRepository
   ) {}
 
-  async execute(userId: string, name: string, description: string): Promise<Wishlist> {
+  async execute(userId: string, name: string, description: string, isDefault: boolean = false): Promise<Wishlist> {
     const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new UserNotFoundException(userId);
@@ -19,12 +19,18 @@ export class CreateWishlistUseCase {
       throw new DuplicateWishlistNameException(name, userId);
     }
 
+    // If this wishlist is being set as default, clear the default status from other wishlists
+    if (isDefault) {
+      await this.wishlistRepo.clearDefaultForUser(userId);
+    }
+
     const wishlist = new Wishlist(
       this.generateId(),
       userId,
       name,
       description,
       [],
+      isDefault,
       new Date(),
       new Date()
     );
@@ -128,7 +134,7 @@ export class DeleteWishlistUseCase {
 export class UpdateWishlistUseCase {
   constructor(private readonly wishlistRepo: IWishlistRepository) {}
 
-  async execute(id: string, name: string, description: string): Promise<Wishlist> {
+  async execute(id: string, name: string, description: string, isDefault?: boolean): Promise<Wishlist> {
     const wishlist = await this.wishlistRepo.findById(id);
     if (!wishlist) {
       throw new WishlistNotFoundException(id);
@@ -142,7 +148,36 @@ export class UpdateWishlistUseCase {
       }
     }
 
-    const updatedWishlist = wishlist.update(name, description);
+    // Update basic fields
+    let updatedWishlist = wishlist.update(name, description);
+
+    // Handle isDefault if provided
+    if (isDefault !== undefined && isDefault !== wishlist.isDefault) {
+      if (isDefault) {
+        // If setting as default, clear other defaults first
+        await this.wishlistRepo.clearDefaultForUser(wishlist.userId);
+      }
+      updatedWishlist = updatedWishlist.setDefault(isDefault);
+    }
+
+    return await this.wishlistRepo.save(updatedWishlist);
+  }
+}
+
+export class SetDefaultWishlistUseCase {
+  constructor(private readonly wishlistRepo: IWishlistRepository) {}
+
+  async execute(id: string): Promise<Wishlist> {
+    const wishlist = await this.wishlistRepo.findById(id);
+    if (!wishlist) {
+      throw new WishlistNotFoundException(id);
+    }
+
+    // Clear default for all other wishlists of this user
+    await this.wishlistRepo.clearDefaultForUser(wishlist.userId);
+
+    // Set this wishlist as default
+    const updatedWishlist = wishlist.setDefault(true);
     return await this.wishlistRepo.save(updatedWishlist);
   }
 }

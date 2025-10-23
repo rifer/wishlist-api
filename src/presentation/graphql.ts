@@ -9,6 +9,7 @@ import {
   GetAllWishlistsUseCase,
   UpdateWishlistUseCase,
   DeleteWishlistUseCase,
+  SetDefaultWishlistUseCase,
   MoveItemsUseCase
 } from '../application/usecases';
 
@@ -19,6 +20,7 @@ export const graphqlSchema = buildSchema(`
     name: String!
     description: String!
     items: [WishlistItem!]!
+    isDefault: Boolean!
     createdAt: String!
     updatedAt: String!
   }
@@ -59,9 +61,10 @@ export const graphqlSchema = buildSchema(`
   }
 
   type Mutation {
-    createWishlist(userId: String!, name: String!, description: String!): Wishlist!
-    updateWishlist(id: String!, name: String!, description: String!): Wishlist!
+    createWishlist(userId: String!, name: String!, description: String!, isDefault: Boolean): Wishlist!
+    updateWishlist(id: String!, name: String!, description: String!, isDefault: Boolean): Wishlist!
     deleteWishlist(id: String!): Boolean!
+    setDefaultWishlist(id: String!): Wishlist!
     addItemToWishlist(
       wishlistId: String!
       productId: String!
@@ -90,6 +93,7 @@ export function createGraphQLResolvers(
   const getAllWishlistsUC = new GetAllWishlistsUseCase(wishlistRepo);
   const updateWishlistUC = new UpdateWishlistUseCase(wishlistRepo);
   const deleteWishlistUC = new DeleteWishlistUseCase(wishlistRepo);
+  const setDefaultWishlistUC = new SetDefaultWishlistUseCase(wishlistRepo);
   const moveItemsUC = new MoveItemsUseCase(wishlistRepo);
 
   return {
@@ -103,14 +107,16 @@ export function createGraphQLResolvers(
       return { ...user, wishlists };
     },
     userWishlists: ({ userId }: { userId: string }) => getWishlistsByUserUC.execute(userId),
-    createWishlist: ({ userId, name, description }: any) =>
-      createWishlistUC.execute(userId, name, description),
-    updateWishlist: ({ id, name, description }: any) =>
-      updateWishlistUC.execute(id, name, description),
+    createWishlist: ({ userId, name, description, isDefault }: any) =>
+      createWishlistUC.execute(userId, name, description, isDefault || false),
+    updateWishlist: ({ id, name, description, isDefault }: any) =>
+      updateWishlistUC.execute(id, name, description, isDefault),
     deleteWishlist: async ({ id }: { id: string }) => {
       await deleteWishlistUC.execute(id);
       return true;
     },
+    setDefaultWishlist: ({ id }: { id: string }) =>
+      setDefaultWishlistUC.execute(id),
     addItemToWishlist: (args: any) =>
       addItemUC.execute(
         args.wishlistId,

@@ -9,6 +9,7 @@ import {
   GetAllWishlistsUseCase,
   DeleteWishlistUseCase,
   UpdateWishlistUseCase,
+  SetDefaultWishlistUseCase,
   MoveItemsUseCase
 } from '../application/usecases';
 import { IWishlistRepository, IUserRepository } from '../domain/ports';
@@ -27,6 +28,7 @@ export function createRoutes(
   const getAllWishlistsUC = new GetAllWishlistsUseCase(wishlistRepo);
   const deleteWishlistUC = new DeleteWishlistUseCase(wishlistRepo);
   const updateWishlistUC = new UpdateWishlistUseCase(wishlistRepo);
+  const setDefaultWishlistUC = new SetDefaultWishlistUseCase(wishlistRepo);
   const moveItemsUC = new MoveItemsUseCase(wishlistRepo);
 
   router.get('/wishlists', async (req: Request, res: Response) => {
@@ -42,7 +44,12 @@ export function createRoutes(
 
   router.post('/wishlists', async (req: Request, res: Response) => {
     try {
-      const wishlist = await createWishlistUC.execute(req.body.userId, req.body.name, req.body.description);
+      const wishlist = await createWishlistUC.execute(
+        req.body.userId,
+        req.body.name,
+        req.body.description,
+        req.body.isDefault || false
+      );
       res.status(201).json(wishlist);
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
@@ -51,7 +58,21 @@ export function createRoutes(
 
   router.put('/wishlists/:id', async (req: Request, res: Response) => {
     try {
-      const wishlist = await updateWishlistUC.execute(req.params.id, req.body.name, req.body.description);
+      const wishlist = await updateWishlistUC.execute(
+        req.params.id,
+        req.body.name,
+        req.body.description,
+        req.body.isDefault
+      );
+      res.json(wishlist);
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  });
+
+  router.post('/wishlists/:id/set-default', async (req: Request, res: Response) => {
+    try {
+      const wishlist = await setDefaultWishlistUC.execute(req.params.id);
       res.json(wishlist);
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
