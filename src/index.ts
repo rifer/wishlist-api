@@ -34,8 +34,7 @@ app.use('/api', apiRoutes);
 const graphqlResolvers = createGraphQLResolvers(wishlistRepo, userRepo);
 app.use('/graphql', createHandler({
   schema: graphqlSchema,
-  rootValue: graphqlResolvers,
-  graphql: true
+  rootValue: graphqlResolvers
 }));
 
 const PORT = process.env.PORT || 3000;
