@@ -32,7 +32,7 @@ const apiRoutes = createRoutes(wishlistRepo, userRepo);
 app.use('/api', apiRoutes);
 
 const graphqlResolvers = createGraphQLResolvers(wishlistRepo, userRepo);
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', createHandler({
   schema: graphqlSchema,
   rootValue: graphqlResolvers,
   graphiql: true
