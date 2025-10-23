@@ -4,6 +4,7 @@ import { createHandler } from 'graphql-http/lib/use/express';
 import { InMemoryWishlistRepository, InMemoryUserRepository } from './infrastructure/repositories';
 import { createRoutes } from './presentation/routes';
 import { serveSwaggerUI, serveSwaggerJSON } from './presentation/swagger-ui';
+import { serveGraphiQL } from './presentation/graphiql';
 import { graphqlSchema, createGraphQLResolvers } from './presentation/graphql';
 
 const app = express();
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
     endpoints: {
       swagger: '/api-docs',
       graphql: '/graphql',
+      graphiql: '/graphiql',
       rest: '/api'
     }
   });
@@ -33,10 +35,15 @@ const apiRoutes = createRoutes(wishlistRepo, userRepo);
 app.use('/api', apiRoutes);
 
 const graphqlResolvers = createGraphQLResolvers(wishlistRepo, userRepo);
+
+// GraphQL endpoint
 app.use('/graphql', createHandler({
   schema: graphqlSchema,
   rootValue: graphqlResolvers
 }));
+
+// GraphiQL IDE
+app.get('/graphiql', serveGraphiQL);
 
 const PORT = process.env.PORT || 3000;
 
@@ -45,6 +52,7 @@ if (require.main === module) {
     console.log(`🚀 Server: http://localhost:${PORT}`);
     console.log(`📚 Swagger: http://localhost:${PORT}/api-docs`);
     console.log(`🔮 GraphQL: http://localhost:${PORT}/graphql`);
+    console.log(`🎮 GraphiQL: http://localhost:${PORT}/graphiql`);
   });
 }
 
