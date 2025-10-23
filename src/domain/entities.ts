@@ -32,6 +32,18 @@ export class Wishlist {
       new Date()
     );
   }
+
+  update(name: string, description: string): Wishlist {
+    return new Wishlist(
+      this.id,
+      this.userId,
+      name,
+      description,
+      this.items,
+      this.createdAt,
+      new Date()
+    );
+  }
 }
 
 export class WishlistItem {
@@ -44,6 +56,8 @@ export class WishlistItem {
     public readonly price: number,
     public readonly priority: Priority,
     public readonly notes: string,
+    public readonly currency: string = 'EUR',
+    public readonly thumbnail: string = '',
     public readonly addedAt: Date
   ) {}
 }

@@ -39,6 +39,8 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       150.00,
       Priority.HIGH,
       'Need for gaming setup',
+      'EUR',
+      '',
       new Date('2025-01-15')
     );
 
@@ -51,6 +53,8 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       80.00,
       Priority.MEDIUM,
       'For better productivity',
+      'EUR',
+      '',
       new Date('2025-01-20')
     );
 
@@ -63,6 +67,8 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       120.00,
       Priority.HIGH,
       'For marathon training',
+      'USD',
+      '',
       new Date('2025-02-01')
     );
 
@@ -75,6 +81,8 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
       200.00,
       Priority.MEDIUM,
       'Track my progress',
+      'USD',
+      '',
       new Date('2025-02-05')
     );
 

@@ -33,6 +33,8 @@ export const swaggerDocument = {
           price: { type: 'number' },
           priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
           notes: { type: 'string' },
+          currency: { type: 'string', default: 'EUR', description: 'ISO 4217 currency code' },
+          thumbnail: { type: 'string', default: '', description: 'Base64 encoded image' },
           addedAt: { type: 'string', format: 'date-time' }
         }
       },
@@ -51,18 +53,220 @@ export const swaggerDocument = {
     '/wishlists': {
       get: {
         summary: 'Get all wishlists',
-        responses: { '200': { description: 'List of wishlists' } }
+        tags: ['Wishlists'],
+        responses: {
+          '200': {
+            description: 'List of wishlists',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Wishlist' }
+                }
+              }
+            }
+          }
+        }
       },
       post: {
         summary: 'Create a wishlist',
-        responses: { '201': { description: 'Wishlist created' } }
+        tags: ['Wishlists'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['userId', 'name', 'description'],
+                properties: {
+                  userId: { type: 'string' },
+                  name: { type: 'string' },
+                  description: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Wishlist created',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '400': { description: 'Bad request' }
+        }
       }
     },
     '/wishlists/{id}': {
       get: {
         summary: 'Get wishlist by ID',
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { '200': { description: 'Wishlist found' } }
+        tags: ['Wishlists'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '404': { description: 'Wishlist not found' }
+        }
+      },
+      put: {
+        summary: 'Update a wishlist',
+        tags: ['Wishlists'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'description'],
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Wishlist updated',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '400': { description: 'Bad request' },
+          '404': { description: 'Wishlist not found' }
+        }
+      },
+      delete: {
+        summary: 'Delete a wishlist',
+        tags: ['Wishlists'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '204': { description: 'Wishlist deleted' }
+        }
+      }
+    },
+    '/wishlists/{id}/items': {
+      post: {
+        summary: 'Add item to wishlist',
+        tags: ['Wishlist Items'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['productId', 'productName', 'productUrl', 'price', 'priority', 'notes'],
+                properties: {
+                  productId: { type: 'string' },
+                  productName: { type: 'string' },
+                  productUrl: { type: 'string' },
+                  price: { type: 'number' },
+                  priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
+                  notes: { type: 'string' },
+                  currency: { type: 'string', default: 'EUR', description: 'ISO 4217 currency code (optional, defaults to EUR)' },
+                  thumbnail: { type: 'string', default: '', description: 'Base64 encoded image (optional)' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Item added to wishlist',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '400': { description: 'Bad request' },
+          '404': { description: 'Wishlist not found' }
+        }
+      }
+    },
+    '/wishlists/{wishlistId}/items/{itemId}': {
+      delete: {
+        summary: 'Remove item from wishlist',
+        tags: ['Wishlist Items'],
+        parameters: [
+          { name: 'wishlistId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'itemId', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Item removed from wishlist',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Wishlist' }
+              }
+            }
+          },
+          '400': { description: 'Bad request' },
+          '404': { description: 'Wishlist not found' }
+        }
+      }
+    },
+    '/users': {
+      get: {
+        summary: 'Get all users',
+        tags: ['Users'],
+        responses: {
+          '200': {
+            description: 'List of users',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/User' }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/users/{id}/wishlists': {
+      get: {
+        summary: 'Get wishlists by user ID',
+        tags: ['Users'],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'User wishlists',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Wishlist' }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

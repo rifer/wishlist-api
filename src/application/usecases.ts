@@ -41,7 +41,9 @@ export class AddItemToWishlistUseCase {
     productUrl: string,
     price: number,
     priority: Priority,
-    notes: string
+    notes: string,
+    currency: string = 'EUR',
+    thumbnail: string = ''
   ): Promise<Wishlist> {
     const wishlist = await this.wishlistRepo.findById(wishlistId);
     if (!wishlist) {
@@ -57,6 +59,8 @@ export class AddItemToWishlistUseCase {
       price,
       priority,
       notes,
+      currency,
+      thumbnail,
       new Date()
     );
 
@@ -112,5 +116,19 @@ export class DeleteWishlistUseCase {
 
   async execute(id: string): Promise<void> {
     await this.wishlistRepo.delete(id);
+  }
+}
+
+export class UpdateWishlistUseCase {
+  constructor(private readonly wishlistRepo: IWishlistRepository) {}
+
+  async execute(id: string, name: string, description: string): Promise<Wishlist> {
+    const wishlist = await this.wishlistRepo.findById(id);
+    if (!wishlist) {
+      throw new WishlistNotFoundException(id);
+    }
+
+    const updatedWishlist = wishlist.update(name, description);
+    return await this.wishlistRepo.save(updatedWishlist);
   }
 }
