@@ -64,8 +64,15 @@ export function createRoutes(
   router.post('/wishlists/:id/items', async (req: Request, res: Response) => {
     try {
       const wishlist = await addItemUC.execute(
-        req.params.id, req.body.productId, req.body.productName,
-        req.body.productUrl, req.body.price, req.body.priority, req.body.notes
+        req.params.id,
+        req.body.productId,
+        req.body.productName,
+        req.body.productUrl,
+        req.body.price,
+        req.body.priority,
+        req.body.notes,
+        req.body.currency || 'EUR',
+        req.body.thumbnail || ''
       );
       res.json(wishlist);
     } catch (error) {

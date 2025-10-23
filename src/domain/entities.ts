@@ -56,6 +56,8 @@ export class WishlistItem {
     public readonly price: number,
     public readonly priority: Priority,
     public readonly notes: string,
+    public readonly currency: string = 'EUR',
+    public readonly thumbnail: string = '',
     public readonly addedAt: Date
   ) {}
 }

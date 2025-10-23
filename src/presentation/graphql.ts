@@ -31,6 +31,8 @@ export const graphqlSchema = buildSchema(`
     price: Float!
     priority: String!
     notes: String!
+    currency: String!
+    thumbnail: String!
     addedAt: String!
   }
 
@@ -62,6 +64,8 @@ export const graphqlSchema = buildSchema(`
       price: Float!
       priority: String!
       notes: String!
+      currency: String
+      thumbnail: String
     ): Wishlist!
     removeItemFromWishlist(wishlistId: String!, itemId: String!): Wishlist!
   }
@@ -107,7 +111,9 @@ export function createGraphQLResolvers(
         args.productUrl,
         args.price,
         args.priority,
-        args.notes
+        args.notes,
+        args.currency || 'EUR',
+        args.thumbnail || ''
       ),
     removeItemFromWishlist: ({ wishlistId, itemId }: any) =>
       removeItemUC.execute(wishlistId, itemId)

@@ -33,6 +33,8 @@ export const swaggerDocument = {
           price: { type: 'number' },
           priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
           notes: { type: 'string' },
+          currency: { type: 'string', default: 'EUR', description: 'ISO 4217 currency code' },
+          thumbnail: { type: 'string', default: '', description: 'Base64 encoded image' },
           addedAt: { type: 'string', format: 'date-time' }
         }
       },
@@ -182,7 +184,9 @@ export const swaggerDocument = {
                   productUrl: { type: 'string' },
                   price: { type: 'number' },
                   priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
-                  notes: { type: 'string' }
+                  notes: { type: 'string' },
+                  currency: { type: 'string', default: 'EUR', description: 'ISO 4217 currency code (optional, defaults to EUR)' },
+                  thumbnail: { type: 'string', default: '', description: 'Base64 encoded image (optional)' }
                 }
               }
             }

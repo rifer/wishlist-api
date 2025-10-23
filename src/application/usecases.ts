@@ -41,7 +41,9 @@ export class AddItemToWishlistUseCase {
     productUrl: string,
     price: number,
     priority: Priority,
-    notes: string
+    notes: string,
+    currency: string = 'EUR',
+    thumbnail: string = ''
   ): Promise<Wishlist> {
     const wishlist = await this.wishlistRepo.findById(wishlistId);
     if (!wishlist) {
@@ -57,6 +59,8 @@ export class AddItemToWishlistUseCase {
       price,
       priority,
       notes,
+      currency,
+      thumbnail,
       new Date()
     );
 
