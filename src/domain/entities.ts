@@ -98,3 +98,17 @@ export class UserNotFoundException extends Error {
     this.name = 'UserNotFoundException';
   }
 }
+
+export class DuplicateWishlistNameException extends Error {
+  constructor(name: string, userId: string) {
+    super(`User ${userId} already has a wishlist named "${name}"`);
+    this.name = 'DuplicateWishlistNameException';
+  }
+}
+
+export class WishlistItemNotFoundException extends Error {
+  constructor(itemId: string) {
+    super(`Item with id ${itemId} not found`);
+    this.name = 'WishlistItemNotFoundException';
+  }
+}

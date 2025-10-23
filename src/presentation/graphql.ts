@@ -8,7 +8,8 @@ import {
   GetWishlistByIdUseCase,
   GetAllWishlistsUseCase,
   UpdateWishlistUseCase,
-  DeleteWishlistUseCase
+  DeleteWishlistUseCase,
+  MoveItemsUseCase
 } from '../application/usecases';
 
 export const graphqlSchema = buildSchema(`
@@ -44,6 +45,11 @@ export const graphqlSchema = buildSchema(`
     wishlists: [Wishlist!]!
   }
 
+  type MoveItemsResult {
+    source: Wishlist!
+    destination: Wishlist!
+  }
+
   type Query {
     wishlists: [Wishlist!]!
     wishlist(id: String!): Wishlist
@@ -68,6 +74,7 @@ export const graphqlSchema = buildSchema(`
       thumbnail: String
     ): Wishlist!
     removeItemFromWishlist(wishlistId: String!, itemId: String!): Wishlist!
+    moveItems(sourceListId: String!, destinationListId: String!, itemIds: [String!]!): MoveItemsResult!
   }
 `);
 
@@ -83,6 +90,7 @@ export function createGraphQLResolvers(
   const getAllWishlistsUC = new GetAllWishlistsUseCase(wishlistRepo);
   const updateWishlistUC = new UpdateWishlistUseCase(wishlistRepo);
   const deleteWishlistUC = new DeleteWishlistUseCase(wishlistRepo);
+  const moveItemsUC = new MoveItemsUseCase(wishlistRepo);
 
   return {
     wishlists: () => getAllWishlistsUC.execute(),
@@ -116,6 +124,8 @@ export function createGraphQLResolvers(
         args.thumbnail || ''
       ),
     removeItemFromWishlist: ({ wishlistId, itemId }: any) =>
-      removeItemUC.execute(wishlistId, itemId)
+      removeItemUC.execute(wishlistId, itemId),
+    moveItems: ({ sourceListId, destinationListId, itemIds }: any) =>
+      moveItemsUC.execute(sourceListId, destinationListId, itemIds)
   };
 }

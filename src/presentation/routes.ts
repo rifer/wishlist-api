@@ -8,7 +8,8 @@ import {
   GetWishlistByIdUseCase,
   GetAllWishlistsUseCase,
   DeleteWishlistUseCase,
-  UpdateWishlistUseCase
+  UpdateWishlistUseCase,
+  MoveItemsUseCase
 } from '../application/usecases';
 import { IWishlistRepository, IUserRepository } from '../domain/ports';
 
@@ -26,6 +27,7 @@ export function createRoutes(
   const getAllWishlistsUC = new GetAllWishlistsUseCase(wishlistRepo);
   const deleteWishlistUC = new DeleteWishlistUseCase(wishlistRepo);
   const updateWishlistUC = new UpdateWishlistUseCase(wishlistRepo);
+  const moveItemsUC = new MoveItemsUseCase(wishlistRepo);
 
   router.get('/wishlists', async (req: Request, res: Response) => {
     const wishlists = await getAllWishlistsUC.execute();
@@ -84,6 +86,16 @@ export function createRoutes(
     try {
       const wishlist = await removeItemUC.execute(req.params.wishlistId, req.params.itemId);
       res.json(wishlist);
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  });
+
+  router.post('/wishlists/move-items', async (req: Request, res: Response) => {
+    try {
+      const { sourceListId, destinationListId, itemIds } = req.body;
+      const result = await moveItemsUC.execute(sourceListId, destinationListId, itemIds);
+      res.json(result);
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
     }

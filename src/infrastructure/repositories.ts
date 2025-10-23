@@ -16,6 +16,13 @@ export class InMemoryWishlistRepository implements IWishlistRepository {
     return Array.from(this.wishlists.values()).filter(w => w.userId === userId);
   }
 
+  async findByUserIdAndName(userId: string, name: string): Promise<Wishlist | null> {
+    const wishlist = Array.from(this.wishlists.values()).find(
+      w => w.userId === userId && w.name.toLowerCase() === name.toLowerCase()
+    );
+    return wishlist || null;
+  }
+
   async save(wishlist: Wishlist): Promise<Wishlist> {
     this.wishlists.set(wishlist.id, wishlist);
     return wishlist;

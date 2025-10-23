@@ -1,4 +1,4 @@
-import { Wishlist, WishlistItem, Priority, WishlistNotFoundException, UserNotFoundException } from '../domain/entities';
+import { Wishlist, WishlistItem, Priority, WishlistNotFoundException, UserNotFoundException, DuplicateWishlistNameException, WishlistItemNotFoundException } from '../domain/entities';
 import { IWishlistRepository, IUserRepository } from '../domain/ports';
 
 export class CreateWishlistUseCase {
@@ -11,6 +11,12 @@ export class CreateWishlistUseCase {
     const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new UserNotFoundException(userId);
+    }
+
+    // Check for duplicate name
+    const existingWishlist = await this.wishlistRepo.findByUserIdAndName(userId, name);
+    if (existingWishlist) {
+      throw new DuplicateWishlistNameException(name, userId);
     }
 
     const wishlist = new Wishlist(
@@ -128,7 +134,84 @@ export class UpdateWishlistUseCase {
       throw new WishlistNotFoundException(id);
     }
 
+    // Check for duplicate name (only if the name is changing)
+    if (wishlist.name.toLowerCase() !== name.toLowerCase()) {
+      const existingWishlist = await this.wishlistRepo.findByUserIdAndName(wishlist.userId, name);
+      if (existingWishlist) {
+        throw new DuplicateWishlistNameException(name, wishlist.userId);
+      }
+    }
+
     const updatedWishlist = wishlist.update(name, description);
     return await this.wishlistRepo.save(updatedWishlist);
+  }
+}
+
+export class MoveItemsUseCase {
+  constructor(private readonly wishlistRepo: IWishlistRepository) {}
+
+  async execute(sourceListId: string, destinationListId: string, itemIds: string[]): Promise<{ source: Wishlist; destination: Wishlist }> {
+    // Fetch both wishlists
+    const sourceList = await this.wishlistRepo.findById(sourceListId);
+    if (!sourceList) {
+      throw new WishlistNotFoundException(sourceListId);
+    }
+
+    const destinationList = await this.wishlistRepo.findById(destinationListId);
+    if (!destinationList) {
+      throw new WishlistNotFoundException(destinationListId);
+    }
+
+    // Find items to move
+    const itemsToMove: WishlistItem[] = [];
+    const notFoundItems: string[] = [];
+
+    for (const itemId of itemIds) {
+      const item = sourceList.items.find(i => i.id === itemId);
+      if (item) {
+        itemsToMove.push(item);
+      } else {
+        notFoundItems.push(itemId);
+      }
+    }
+
+    // If any items not found, throw error
+    if (notFoundItems.length > 0) {
+      throw new WishlistItemNotFoundException(notFoundItems.join(', '));
+    }
+
+    // Remove items from source list
+    let updatedSourceList = sourceList;
+    for (const item of itemsToMove) {
+      updatedSourceList = updatedSourceList.removeItem(item.id);
+    }
+
+    // Add items to destination list (update wishlistId)
+    let updatedDestinationList = destinationList;
+    for (const item of itemsToMove) {
+      const newItem = new WishlistItem(
+        item.id,
+        destinationListId,
+        item.productId,
+        item.productName,
+        item.productUrl,
+        item.price,
+        item.priority,
+        item.notes,
+        item.currency,
+        item.thumbnail,
+        item.addedAt
+      );
+      updatedDestinationList = updatedDestinationList.addItem(newItem);
+    }
+
+    // Save both wishlists
+    const savedSource = await this.wishlistRepo.save(updatedSourceList);
+    const savedDestination = await this.wishlistRepo.save(updatedDestinationList);
+
+    return {
+      source: savedSource,
+      destination: savedDestination
+    };
   }
 }

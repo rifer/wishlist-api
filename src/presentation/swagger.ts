@@ -228,6 +228,50 @@ export const swaggerDocument = {
         }
       }
     },
+    '/wishlists/move-items': {
+      post: {
+        summary: 'Move items from one wishlist to another',
+        tags: ['Wishlist Items'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['sourceListId', 'destinationListId', 'itemIds'],
+                properties: {
+                  sourceListId: { type: 'string', description: 'Source wishlist ID' },
+                  destinationListId: { type: 'string', description: 'Destination wishlist ID' },
+                  itemIds: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Array of item IDs to move'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Items moved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    source: { $ref: '#/components/schemas/Wishlist' },
+                    destination: { $ref: '#/components/schemas/Wishlist' }
+                  }
+                }
+              }
+            }
+          },
+          '400': { description: 'Bad request - invalid item IDs or wishlist not found' },
+          '404': { description: 'Wishlist or items not found' }
+        }
+      }
+    },
     '/users': {
       get: {
         summary: 'Get all users',
