@@ -1,10 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { InMemoryWishlistRepository, InMemoryUserRepository } from './infrastructure/repositories';
 import { createRoutes } from './presentation/routes';
-import { swaggerDocument } from './presentation/swagger';
+import { serveSwaggerUI, serveSwaggerJSON } from './presentation/swagger-ui';
 import { graphqlSchema, createGraphQLResolvers } from './presentation/graphql';
 
 const app = express();
@@ -26,7 +25,9 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// Swagger UI routes
+app.get('/api-docs', serveSwaggerUI);
+app.get('/api-docs.json', serveSwaggerJSON);
 
 const apiRoutes = createRoutes(wishlistRepo, userRepo);
 app.use('/api', apiRoutes);
