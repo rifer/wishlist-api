@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { graphqlHTTP } from 'express-graphql';
+import { createHandler } from 'graphql-http/lib/use/express';
 import { InMemoryWishlistRepository, InMemoryUserRepository } from './infrastructure/repositories';
 import { createRoutes } from './presentation/routes';
 import { swaggerDocument } from './presentation/swagger';
